@@ -1,9 +1,19 @@
 from PIL import Image
-from numpy import asarray
+import numpy
 from keras.preprocessing.image import save_img
 
 image = Image.open("images/image.bmp")
-data = asarray(image)
-print(data[1][1])
-print(data.shape)
-save_img('images/out.bmp', data)
+data = numpy.asarray(image)
+print(type(data))
+Y = []
+for i in data:
+    tmp1 = []
+    for j in i:
+        tmp2 = []
+        for k in j:
+            tmp2.append(k)
+        tmp1.append(tmp2)
+    Y.append(tmp1)
+x = numpy.array(Y)
+print(x)
+save_img('images/out.bmp', x)
