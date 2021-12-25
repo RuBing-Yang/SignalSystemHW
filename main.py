@@ -8,10 +8,12 @@ def upAlign(x, y):
         return x
     return x + y - x % y
 
+
 def dct(timeDomain, frequencyDomain, x, y):
     for i in range(0, 8):
         for j in range(0, 8):
             frequencyDomain[i][j] += 2 / 8
+
 
 def encode(timeDomain, frequencyDomain):
     for i in range(0, timeDomain.shape[0], 8):
@@ -23,7 +25,6 @@ def encode(timeDomain, frequencyDomain):
 image = Image.open("images/image.bmp")
 data = numpy.asarray(image)
 print(type(data))
-print(data.shape)
 Y = numpy.zeros([upAlign(len(data), 8), upAlign(len(data[0]), 8)], dtype=int)
 Cb = numpy.zeros([upAlign((len(data) + 1) // 2), upAlign((len(data[0]) + 1) // 2)], dtype=int)
 Cr = numpy.zeros([upAlign((len(data) + 1) // 2), upAlign((len(data[0]) + 1) // 2)], dtype=int)
