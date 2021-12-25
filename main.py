@@ -5,6 +5,7 @@ from keras.preprocessing.image import save_img
 image = Image.open("images/image.bmp")
 data = numpy.asarray(image)
 print(type(data))
+print(data.shape[0])
 Y = []
 for i in data:
     tmp1 = []
