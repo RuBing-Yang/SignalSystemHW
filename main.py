@@ -24,11 +24,18 @@ def dct(time_domain, frequency_domain, x, y):
                         math.cos(math.pi * v * (2 * j + 1) / 16)
 
 
+def quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarray) -> None:
+    for i in range(0, frequency_domain.shape[0], 8):
+        for j in range(0, frequency_domain.shape[1], 8):
+            for u in range(0, 8):
+                for v in range(0, 8):
+                    frequency_domain[i + u][j + v] //= standard_table[u][v]
+
+
 def encode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray) -> None:
     for i in range(0, time_domain.shape[0], 8):
-        for j in range(0, time_domain.shape[0], 8):
+        for j in range(0, time_domain.shape[1], 8):
             dct(time_domain, frequency_domain, i, j)
-    dct(time_domain, frequency_domain)
 
 
 def main():
