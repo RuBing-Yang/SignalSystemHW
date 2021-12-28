@@ -22,8 +22,7 @@ def quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarra
             frequency_domain[i][j] = round(frequency_domain[i][j] / standard_table[i][j])
 
 
-def encode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray,
-           standard_table: numpy.ndarray, res) -> None:
+def encode(time_domain: numpy.ndarray, standard_table: numpy.ndarray, res) -> None:
     for i in range(0, time_domain.shape[0], 8):
         for j in range(0, time_domain.shape[1], 8):
             t = numpy.empty([8, 8], dtype=float)
@@ -33,9 +32,19 @@ def encode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray,
             f = numpy.matmul(A, t)
             f = numpy.matmul(f, A_T)
             quantification(f, standard_table)
-            for u in range(0, 8):
-                for v in range(0, 8):
-                    frequency_domain[i + u][j + v] = f[u][v]
+            x = 0
+            y = 0
+            cnt = 0
+            for u in Z:
+                x += u[0]
+                y += u[1]
+                if f[x][y] == 0:
+                    cnt = cnt + 1
+                else:
+                    res.append([cnt, f[x][y]])
+                    cnt = 0
+            if f[7][7] == 0:
+                res.append([0, 0])
 
 
 def inverse_quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarray) -> None:
@@ -44,7 +53,29 @@ def inverse_quantification(frequency_domain: numpy.ndarray, standard_table: nump
             frequency_domain[i][j] *= standard_table[i][j]
 
 
-def decode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray, standard_table: numpy.ndarray) -> None:
+def decode(time_domain: numpy.ndarray, res, standard_table: numpy.ndarray) -> None:
+    frequency_domain = numpy.empty([time_domain.shape[0], time_domain.shape[1]])
+    now = 0
+    for i in range(0, time_domain.shape[0], 8):
+        for j in range(0, time_domain.shape[1], 8):
+            x = i
+            y = j
+            cnt = 0
+            flag = 0
+            for u in Z:
+                x += u[0]
+                y += u[1]
+                if flag:
+                    frequency_domain[x][y] = 0
+                elif cnt == res[now][0]:
+                    frequency_domain[x][y] = res[now][1]
+                    if res[now][1] == 0:
+                        flag = 1
+                    now = now + 1
+                    cnt = 0
+                else:
+                    frequency_domain[x][y] = 0
+                    cnt = cnt + 1
     for i in range(0, frequency_domain.shape[0], 8):
         for j in range(0, frequency_domain.shape[1], 8):
             f = numpy.empty([8, 8])
@@ -71,12 +102,6 @@ def main():
             luminance_time_domain[i][j] = 0.299 * data[i][j][0] + 0.587 * data[i][j][1] + 0.114 * data[i][j][2]
             blue_chrominance_time_domain[i][j] = 0.492 * (data[i][j][2] - luminance_time_domain[i][j])
             red_chrominance_time_domain[i][j] = 0.877 * (data[i][j][0] - luminance_time_domain[i][j])
-    luminance_frequency_domain = \
-        numpy.zeros([luminance_time_domain.shape[0], luminance_time_domain.shape[1]], dtype=float)
-    blue_chrominance_frequency_domain = \
-        numpy.zeros([blue_chrominance_time_domain.shape[0], blue_chrominance_time_domain.shape[1]], dtype=float)
-    red_chrominance_frequency_domain = \
-        numpy.zeros([red_chrominance_time_domain.shape[0], red_chrominance_time_domain.shape[1]], dtype=float)
     luminance_quantification = numpy.array(
         [[16, 11, 10, 16, 24, 40, 51, 61],
          [12, 12, 14, 19, 26, 58, 60, 55],
@@ -98,13 +123,15 @@ def main():
          [99, 99, 99, 99, 99, 99, 99, 99]]
     )
     luminance_res = []
-    encode(luminance_time_domain, luminance_frequency_domain, luminance_quantification, luminance_res)
-    encode(blue_chrominance_time_domain, blue_chrominance_frequency_domain, chrominance_quantification, luminance_res)
-    encode(red_chrominance_time_domain, red_chrominance_frequency_domain, chrominance_quantification, luminance_res)
+    blue_chrominance_res = []
+    red_chrominance_res = []
+    encode(luminance_time_domain, luminance_quantification, luminance_res)
+    encode(blue_chrominance_time_domain, chrominance_quantification, blue_chrominance_res)
+    encode(red_chrominance_time_domain, chrominance_quantification, red_chrominance_res)
     print("encode end")
-    decode(luminance_time_domain, luminance_frequency_domain, luminance_quantification)
-    decode(blue_chrominance_time_domain, blue_chrominance_frequency_domain, chrominance_quantification)
-    decode(red_chrominance_time_domain, red_chrominance_frequency_domain, chrominance_quantification)
+    decode(luminance_time_domain, luminance_res, luminance_quantification)
+    decode(blue_chrominance_time_domain, blue_chrominance_res, chrominance_quantification)
+    decode(red_chrominance_time_domain, red_chrominance_res, chrominance_quantification)
     res = numpy.empty([luminance_time_domain.shape[0], luminance_time_domain.shape[1], 3], dtype=float)
     for i in range(0, luminance_time_domain.shape[0]):
         for j in range(0, luminance_time_domain.shape[1]):
