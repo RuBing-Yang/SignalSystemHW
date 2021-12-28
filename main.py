@@ -9,6 +9,7 @@ def dbg(tag, img):
     print(f"{tag}: max: {np.max(img)}, min: {np.min(img)}, shape: {img.shape}, type: {img.dtype}, mean: {np.mean(img)}")
     return img
 
+
 def up_align(x, y):
     if x % y == 0:
         return x
@@ -38,21 +39,19 @@ def encode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray,
 
 
 def inverse_quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarray) -> None:
-    for i in range(0, frequency_domain.shape[0], 8):
-        for j in range(0, frequency_domain.shape[1], 8):
-            for u in range(0, 8):
-                for v in range(0, 8):
-                    frequency_domain[i + u][j + v] *= standard_table[u][v]
+    for i in range(0, 8):
+        for j in range(0, 8):
+            frequency_domain[i][j] *= standard_table[i][j]
 
 
 def decode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray, standard_table: numpy.ndarray) -> None:
-    inverse_quantification(frequency_domain, standard_table)
     for i in range(0, frequency_domain.shape[0], 8):
         for j in range(0, frequency_domain.shape[1], 8):
             f = numpy.empty([8, 8])
             for u in range(0, 8):
                 for v in range(0, 8):
                     f[u][v] = frequency_domain[i + u][j + v]
+            inverse_quantification(f, standard_table)
             t = numpy.matmul(A_i, f)
             t = numpy.matmul(t, A_iT)
             for u in range(0, 8):
@@ -61,16 +60,23 @@ def decode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray, standard
 
 
 def main():
-    image = Image.open("images/gray.bmp")
+    image = io.imread("images/image.bmp")
     data = numpy.array(image, dtype=float)
-    dbg('input', data)
     print(data.shape)
     luminance_time_domain = numpy.zeros([len(data) // 8 * 8, len(data[0]) // 8 * 8], dtype=float)
+    blue_chrominance_time_domain = numpy.zeros([len(data) // 8 * 8, len(data[0]) // 8 * 8], dtype=float)
+    red_chrominance_time_domain = numpy.zeros([len(data) // 8 * 8, len(data[0]) // 8 * 8], dtype=float)
     for i in range(0, luminance_time_domain.shape[0]):
         for j in range(0, luminance_time_domain.shape[1]):
-            luminance_time_domain[i][j] = data[i][j] - 128
+            luminance_time_domain[i][j] = 0.299 * data[i][j][0] + 0.587 * data[i][j][1] + 0.114 * data[i][j][2]
+            blue_chrominance_time_domain[i][j] = 0.492 * (data[i][j][2] - luminance_time_domain[i][j])
+            red_chrominance_time_domain[i][j] = 0.877 * (data[i][j][0] - luminance_time_domain[i][j])
     luminance_frequency_domain = \
         numpy.zeros([luminance_time_domain.shape[0], luminance_time_domain.shape[1]], dtype=float)
+    blue_chrominance_frequency_domain = \
+        numpy.zeros([blue_chrominance_time_domain.shape[0], blue_chrominance_time_domain.shape[1]], dtype=float)
+    red_chrominance_frequency_domain = \
+        numpy.zeros([red_chrominance_time_domain.shape[0], red_chrominance_time_domain.shape[1]], dtype=float)
     luminance_quantification = numpy.array(
         [[16, 11, 10, 16, 24, 40, 51, 61],
          [12, 12, 14, 19, 26, 58, 60, 55],
@@ -93,17 +99,20 @@ def main():
     )
     luminance_res = []
     encode(luminance_time_domain, luminance_frequency_domain, luminance_quantification, luminance_res)
+    encode(blue_chrominance_time_domain, blue_chrominance_frequency_domain, chrominance_quantification, luminance_res)
+    encode(red_chrominance_time_domain, red_chrominance_frequency_domain, chrominance_quantification, luminance_res)
     print("encode end")
     decode(luminance_time_domain, luminance_frequency_domain, luminance_quantification)
-    res = numpy.empty([luminance_time_domain.shape[0], luminance_time_domain.shape[1]], dtype=float)
+    decode(blue_chrominance_time_domain, blue_chrominance_frequency_domain, chrominance_quantification)
+    decode(red_chrominance_time_domain, red_chrominance_frequency_domain, chrominance_quantification)
+    res = numpy.empty([luminance_time_domain.shape[0], luminance_time_domain.shape[1], 3], dtype=float)
     for i in range(0, luminance_time_domain.shape[0]):
         for j in range(0, luminance_time_domain.shape[1]):
-            res[i][j] = luminance_time_domain[i][j] + 128
-    dbg('output', res)
-    cliped = res.clip(0, 255)
-    dbg('cliped', cliped)
-    io.imsave("out.bmp", res)
-    io.imsave("cliped.bmp", cliped)
+            res[i][j][0] = luminance_time_domain[i][j] + 1.140 * red_chrominance_time_domain[i][j]
+            res[i][j][1] = luminance_time_domain[i][j] - 0.395 * blue_chrominance_time_domain[i][j] - 0.581 * red_chrominance_time_domain[i][j]
+            res[i][j][2] = luminance_time_domain[i][j] + 2.032 * blue_chrominance_time_domain[i][j]
+    res = res.clip(0, 255)
+    io.imsave("images/out.bmp", res)
 
 
 def init(matrix):
@@ -113,7 +122,6 @@ def init(matrix):
                 x = math.sqrt(1 / 8)
             else:
                 x = math.sqrt(2 / 8)
-            #x = 1
             matrix[i][j] = x * math.cos(math.pi * (j + 0.5) * i / 8)
     a = numpy.zeros([8, 8])
     x = 0
@@ -137,6 +145,14 @@ if __name__ == '__main__':
          [1, 0], [-1, 1], [-1, 1], [-1, 1], [-1, 1],
          [0, 1], [1, -1], [1, -1], [1, -1], [1, -1], [1, -1],
          [1, 0], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1],
+         [0, 1], [1, -1], [1, -1], [1, -1], [1, -1], [1, -1], [1, -1], [1, -1],
+         [0, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1],
+         [1, 0], [1, -1], [1, -1], [1, -1], [1, -1], [1, -1],
+         [0, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1],
+         [1, 0], [1, -1], [1, -1], [1, -1],
+         [0, 1], [-1, 1], [-1, 1],
+         [1, 0], [1, -1],
+         [0, 1]
          ]
     )
     init(A)
