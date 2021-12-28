@@ -1,4 +1,3 @@
-from PIL import Image
 import numpy
 import numpy as np
 import math
@@ -48,56 +47,13 @@ def encode(time_domain: numpy.ndarray, standard_table: numpy.ndarray, directing,
                 alternating.append([0, 0])
 
 
-def inverse_quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarray) -> None:
-    for i in range(0, 8):
-        for j in range(0, 8):
-            frequency_domain[i][j] *= standard_table[i][j]
-
-
-def decode(time_domain: numpy.ndarray, directing, alternating, standard_table: numpy.ndarray) -> None:
-    frequency_domain = numpy.empty([time_domain.shape[0], time_domain.shape[1]])
-    alternating_current = 0
-    directing_current = 0
-    for i in range(0, time_domain.shape[0], 8):
-        for j in range(0, time_domain.shape[1], 8):
-            x = i
-            y = j
-            frequency_domain[x][y] = directing[directing_current]
-            directing_current = directing_current + 1
-            cnt = 0
-            flag = 0
-            for u in Z:
-                x += u[0]
-                y += u[1]
-                if flag:
-                    frequency_domain[x][y] = 0
-                elif cnt == alternating[alternating_current][0]:
-                    frequency_domain[x][y] = alternating[alternating_current][1]
-                    if alternating[alternating_current][1] == 0:
-                        flag = 1
-                    alternating_current = alternating_current + 1
-                    cnt = 0
-                else:
-                    frequency_domain[x][y] = 0
-                    cnt = cnt + 1
-    for i in range(0, frequency_domain.shape[0], 8):
-        for j in range(0, frequency_domain.shape[1], 8):
-            f = numpy.empty([8, 8])
-            for u in range(0, 8):
-                for v in range(0, 8):
-                    f[u][v] = frequency_domain[i + u][j + v]
-            inverse_quantification(f, standard_table)
-            t = numpy.matmul(A_i, f)
-            t = numpy.matmul(t, A_iT)
-            for u in range(0, 8):
-                for v in range(0, 8):
-                    time_domain[i + u][j + v] = t[u][v]
-
-
 def main():
     image = io.imread("images/image.bmp")
     data = numpy.array(image, dtype=float)
     print(data.shape)
+    file_handle = open('1.txt', mode='w')
+    file_handle.write(str(int(len(data) // 16 * 16)) + '\n')
+    file_handle.write(str(int(len(data[0]) // 16 * 16)) + '\n')
 
     luminance_time_domain = numpy.zeros([len(data) // 16 * 16, len(data[0]) // 16 * 16], dtype=float)
     blue_chrominance_time_domain = numpy.zeros([len(data) // 16 * 16, len(data[0]) // 16 * 16], dtype=float)
@@ -133,26 +89,37 @@ def main():
     luminance_directing = []
     blue_chrominance_directing = []
     red_chrominance_directing = []
+
     encode(luminance_time_domain, luminance_quantification, luminance_directing, luminance_alternating)
+    file_handle.write(str(len(luminance_directing)) + '\n')
+    for i in luminance_directing:
+        file_handle.write(str(int(i)) + '\n')
+    file_handle.write(str(len(luminance_alternating)) + '\n')
+    for i in luminance_alternating:
+        file_handle.write(str(int(i[0])) + '\n')
+        file_handle.write(str(int(i[1])) + '\n')
+
     encode(blue_chrominance_time_domain, chrominance_quantification, blue_chrominance_directing,
            blue_chrominance_alternating)
+    file_handle.write(str(len(blue_chrominance_directing)) + '\n')
+    for i in blue_chrominance_directing:
+        file_handle.write(str(int(i)) + '\n')
+    file_handle.write(str(len(blue_chrominance_alternating)) + '\n')
+    for i in blue_chrominance_alternating:
+        file_handle.write(str(int(i[0])) + '\n')
+        file_handle.write(str(int(i[1])) + '\n')
+
     encode(red_chrominance_time_domain, chrominance_quantification, red_chrominance_directing,
            red_chrominance_alternating)
+    file_handle.write(str(len(red_chrominance_directing)) + '\n')
+    for i in red_chrominance_directing:
+        file_handle.write(str(int(i)) + '\n')
+    file_handle.write(str(len(red_chrominance_alternating)) + '\n')
+    for i in red_chrominance_alternating:
+        file_handle.write(str(int(i[0])) + '\n')
+        file_handle.write(str(int(i[1])) + '\n')
     print("encode end")
-    decode(luminance_time_domain, luminance_directing, luminance_alternating, luminance_quantification)
-    decode(blue_chrominance_time_domain, blue_chrominance_directing, blue_chrominance_alternating,
-           chrominance_quantification)
-    decode(red_chrominance_time_domain, red_chrominance_directing, red_chrominance_alternating,
-           chrominance_quantification)
-    res = numpy.empty([luminance_time_domain.shape[0], luminance_time_domain.shape[1], 3], dtype=float)
-    for i in range(0, luminance_time_domain.shape[0]):
-        for j in range(0, luminance_time_domain.shape[1]):
-            res[i][j][0] = luminance_time_domain[i][j] + 1.140 * red_chrominance_time_domain[i][j]
-            res[i][j][1] = luminance_time_domain[i][j] - 0.395 * blue_chrominance_time_domain[i][j] - \
-                0.581 * red_chrominance_time_domain[i][j]
-            res[i][j][2] = luminance_time_domain[i][j] + 2.032 * blue_chrominance_time_domain[i][j]
-    res = res.clip(0, 255)
-    io.imsave("images/out.bmp", res)
+    file_handle.close()
 
 
 def init(matrix):
@@ -163,16 +130,6 @@ def init(matrix):
             else:
                 x = math.sqrt(2 / 8)
             matrix[i][j] = x * math.cos(math.pi * (j + 0.5) * i / 8)
-    a = numpy.zeros([8, 8])
-    x = 0
-    y = 0
-    cnt = 1
-    for i in Z:
-        x += i[0]
-        y += i[1]
-        a[x][y] = cnt
-        cnt = cnt + 1
-    print(a)
 
 
 if __name__ == '__main__':
