@@ -31,7 +31,7 @@ def quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarra
         for j in range(0, frequency_domain.shape[1], 8):
             for u in range(0, 8):
                 for v in range(0, 8):
-                    frequency_domain[i + u][j + v] = frequency_domain[i + u][j + v] / standard_table[u][v]
+                    frequency_domain[i + u][j + v] = round(frequency_domain[i + u][j + v] / standard_table[u][v])
 
 
 def encode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray,
@@ -87,20 +87,21 @@ def decode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray, standard
 def main():
     image = Image.open("images/image.bmp")
     data = numpy.array(image, dtype=float)
-    luminance_time_domain = numpy.zeros([up_align(len(data), 8), up_align(len(data[0]), 8)], dtype=float)
+    luminance_time_domain = numpy.zeros([len(data) // 8 * 8, len(data[0]) // 8 * 8], dtype=float)
     blue_chrominance_time_domain = \
-        numpy.zeros([up_align((len(data) + 1) // 2, 8), up_align((len(data[0]) + 1) // 2, 8)], dtype=float)
+        numpy.zeros([len(data) // 8 * 8, len(data[0]) // 8 * 8], dtype=float)
     red_chrominance_time_domain = \
-        numpy.zeros([up_align((len(data) + 1) // 2, 8), up_align((len(data[0]) + 1) // 2, 8)], dtype=float)
+        numpy.zeros([len(data) // 8 * 8, len(data[0]) // 8 * 8], dtype=float)
     print(luminance_time_domain.shape)
-    for i in range(0, len(data)):
-        for j in range(0, len(data[i])):
+    for i in range(0, luminance_time_domain.shape[0]):
+        for j in range(0, luminance_time_domain.shape[1]):
             luminance_time_domain[i][j] = 0.229 * data[i][j][0] + 0.587 * data[i][j][1] + 0.114 * data[i][j][2]
-            if i % 2 == 0 and j % 2 == 0:
-                blue_chrominance_time_domain[i // 2][j // 2] = \
-                    -0.1687 * data[i][j][0] - 0.3313 * data[i][j][1] + 0.5 * data[i][j][2] + 128
-                red_chrominance_time_domain[i // 2][j // 2] = \
-                    0.5 * data[i][j][0] - 0.4187 * data[i][j][1] - 0.0813 * data[i][j][2] + 128
+            #if i % 2 == 0 and j % 2 == 0:
+            blue_chrominance_time_domain[i][j] = \
+                -0.1687 * data[i][j][0] - 0.3313 * data[i][j][1] + 0.5 * data[i][j][2] + 128
+            #if i % 2 == 1 and j % 2 == 0:
+            red_chrominance_time_domain[i][j] = \
+                0.5 * data[i][j][0] - 0.4187 * data[i][j][1] - 0.0813 * data[i][j][2] + 128
     luminance_frequency_domain = \
         numpy.zeros([luminance_time_domain.shape[0], luminance_time_domain.shape[1]], dtype=float)
     blue_chrominance_frequency_domain = \
@@ -145,16 +146,12 @@ def main():
             res[i][j][2] = luminance_time_domain[i][j]
     for i in range(0, blue_chrominance_time_domain.shape[0]):
         for j in range(0, blue_chrominance_time_domain.shape[1]):
-            for u in range(0, 1):
-                for v in range(0, 1):
-                    res[i * 2 + u][j * 2 + v][1] += -0.34414 * (blue_chrominance_time_domain[i][j] - 128)
-                    res[i * 2 + u][j * 2 + v][2] += 1.772 * (blue_chrominance_time_domain[i][j] - 128)
+            res[i][j][1] += -0.34414 * (blue_chrominance_time_domain[i][j] - 128)
+            res[i][j][2] += 1.772 * (blue_chrominance_time_domain[i][j] - 128)
     for i in range(0, red_chrominance_time_domain.shape[0]):
         for j in range(0, red_chrominance_time_domain.shape[1]):
-            for u in range(0, 1):
-                for v in range(0, 1):
-                    res[i * 2 + u][j * 2 + v][0] += 1.402 * (red_chrominance_time_domain[i][j] - 128)
-                    res[i * 2 + u][j * 2 + v][1] += -0.71414 * (red_chrominance_time_domain[i][j] - 128)
+            res[i][j][0] += 1.402 * (red_chrominance_time_domain[i][j] - 128)
+            res[i][j][1] += -0.71414 * (red_chrominance_time_domain[i][j] - 128)
     save_img('images/out.bmp', res)
 
 
