@@ -31,19 +31,18 @@ def encode(time_domain: numpy.ndarray, frequency_domain: numpy.ndarray,
             for u in range(0, 8):
                 for v in range(0, 8):
                     frequency_domain[i + u][j + v] = f[u][v]
-    print(111)
     quantification(frequency_domain, standard_table)
-    # for i in range(0, frequency_domain.shape[0], 8):
-    #     for j in range(0, frequency_domain.shape[1], 8):
-    #         u = 1
-    #         v = -1
-    #         x = i
-    #         y = j
-    #         while 1:
-    #             if x == i + 7 and y == j + 7:
-    #                 break
-    #             x += u
-    #             y += v
+    for i in range(0, frequency_domain.shape[0], 8):
+        for j in range(0, frequency_domain.shape[1], 8):
+            u = 1
+            v = -1
+            x = i
+            y = j
+            while 1:
+                if x == i + 7 and y == j + 7:
+                    break
+                x += u
+                y += v
 
 
 def inverse_quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarray) -> None:
