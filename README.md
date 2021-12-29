@@ -43,4 +43,8 @@ https://www.quora.com/What-is-the-best-image-compression-algorithm-and-what-is-t
 
 图像压缩技术综述的一篇调研论文：[Image compression algorithms in wireless multimedia sensor networks: A survey](https://www.sciencedirect.com/science/article/pii/S2090447914001567)
 
-### 
+### 运行方式
+
+运行 encode.py，将 images/image.bmp 编码为 1.txt。
+
+运行 decode.py，将 1.txt 转换为 out.bmp
