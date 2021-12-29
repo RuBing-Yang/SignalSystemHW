@@ -48,7 +48,7 @@ def encode(time_domain: numpy.ndarray, standard_table: numpy.ndarray, directing,
 
 
 def main():
-    image = io.imread("images/image.bmp")
+    image = io.imread("images/demo.bmp")
     data = numpy.array(image, dtype=float)
     print(data.shape)
     file_handle = open('1.txt', mode='w')
