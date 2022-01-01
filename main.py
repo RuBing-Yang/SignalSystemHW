@@ -1,9 +1,8 @@
 #!/usr/bin/env python 
 # -*- coding:utf-8 -*-
-import encode
-import decode
+from helper import helper
 
 if __name__ == '__main__':
-    encode.setA()
-    encode.main("images/image.bmp", "1.txt")
-    decode.main("1.txt", "images/out.bmp")
+    helper = helper("images/image.bmp", "encode.txt", "images/out.bmp")
+    helper.encode_from_img()
+    helper.decode_to_img()

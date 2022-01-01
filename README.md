@@ -5,43 +5,21 @@
 
 [toc]
 
-## 资源
+将encode.py和decode.py封装到同一个类helper中
 
-### OpenCV
+调用方法：
 
-[颜色空间变换](https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html)
-
-[傅里叶变换](https://docs.opencv.org/4.x/de/dbc/tutorial_py_fourier_transform.html)
-
-### 测试库
-
-这个回答里面提到了三个开源测试库：
-
-https://www.quora.com/What-is-the-best-image-compression-algorithm-and-what-is-the-Facebook-compression-algorithm
-
-### Github
-
-可能有用：[digital_video_introduction](https://github.com/leandromoreira/digital_video_introduction)
+```python
+from helper import helper
+# 创建类实例，初始化输入、输出图片和编码文件名
+helper = helper("images/image.bmp", "encode.txt", "images/out.bmp")
+# encode
+helper.encode_from_img()
+# decode
+helper.decode_to_img()
+```
 
 
-
-## 基础知识
-
-### 频域变换
-
-#### 彩色图像处理
-
-参考博客：[Images in Frequency Domain](https://sbme-tutorials.github.io/2018/cv/notes/3_week3.html#color-image-processing-block-diagram)
-
-<img src="https://sbme-tutorials.github.io/2018/cv/images/block_diagram.png" alt="img" style="zoom:80%;" />
-
-#### 傅里叶变换
-
-应该是用OpenCV叭
-
-### 图像压缩
-
-图像压缩技术综述的一篇调研论文：[Image compression algorithms in wireless multimedia sensor networks: A survey](https://www.sciencedirect.com/science/article/pii/S2090447914001567)
 
 ### 运行方式
 
