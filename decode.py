@@ -51,7 +51,7 @@ def decode(time_domain: numpy.ndarray, directing, alternating, standard_table: n
                     time_domain[i + u][j + v] = t[u][v]
 
 
-def main():
+def main(file_name, out_img_name):
     luminance_quantification = numpy.array(
         [[16, 11, 10, 16, 24, 40, 51, 61],
          [12, 12, 14, 19, 26, 58, 60, 55],
@@ -73,12 +73,12 @@ def main():
          [99, 99, 99, 99, 99, 99, 99, 99]]
     )
 
-    file_handle = open('1.txt', mode='r')
+    file_handle = open(file_name, mode='r')
     buffer = []
     for i in file_handle.readlines():
         buffer.append(int(i))
     file_handle.close()
-    os.remove("1.txt")
+    # os.remove("1.txt")
     now = 2
     luminance_time_domain = numpy.empty([buffer[0], buffer[1]])
     blue_chrominance_time_domain = numpy.empty([buffer[0], buffer[1]])
@@ -170,4 +170,4 @@ if __name__ == '__main__':
     A_T = A.transpose()
     A_i = numpy.linalg.inv(A)
     A_iT = numpy.linalg.inv(A_T)
-    main()
+    main("1.txt", "images/out.bmp")

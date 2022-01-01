@@ -3,11 +3,12 @@ import numpy as np
 import math
 from skimage import io
 
-
-def dbg(tag, img):
-    print(f"{tag}: max: {np.max(img)}, min: {np.min(img)}, shape: {img.shape}, type: {img.dtype}, mean: {np.mean(img)}")
-    return img
-
+class encode:
+    def dbf(self, tag, img):
+        print(
+            f"{tag}: max: {np.max(img)}, min: {np.min(img)}, shape: {img.shape}, "
+            f"type: {img.dtype}, mean: {np.mean(img)}")
+        return img
 
 def up_align(x, y):
     if x % y == 0:
@@ -21,7 +22,8 @@ def quantification(frequency_domain: numpy.ndarray, standard_table: numpy.ndarra
             frequency_domain[i][j] = round(frequency_domain[i][j] / standard_table[i][j])
 
 
-def encode(time_domain: numpy.ndarray, standard_table: numpy.ndarray, directing, alternating) -> None:
+def encode(time_domain: numpy.ndarray, standard_table: numpy.ndarray,
+           directing, alternating) -> None:
     for i in range(0, time_domain.shape[0], 8):
         for j in range(0, time_domain.shape[1], 8):
             t = numpy.empty([8, 8], dtype=float)
@@ -47,11 +49,11 @@ def encode(time_domain: numpy.ndarray, standard_table: numpy.ndarray, directing,
                 alternating.append([0, 0])
 
 
-def main():
-    image = io.imread("images/demo.bmp")
+def main(in_img_name, file_name):
+    image = io.imread(in_img_name)
     data = numpy.array(image, dtype=float)
     print(data.shape)
-    file_handle = open('1.txt', mode='w')
+    file_handle = open(file_name, mode='w')
     file_handle.write(str(int(len(data) // 16 * 16)) + '\n')
     file_handle.write(str(int(len(data[0]) // 16 * 16)) + '\n')
 
@@ -90,7 +92,8 @@ def main():
     blue_chrominance_directing = []
     red_chrominance_directing = []
 
-    encode(luminance_time_domain, luminance_quantification, luminance_directing, luminance_alternating)
+    encode(luminance_time_domain, luminance_quantification,
+           luminance_directing, luminance_alternating)
     file_handle.write(str(len(luminance_directing)) + '\n')
     for i in luminance_directing:
         file_handle.write(str(int(i)) + '\n')
@@ -131,8 +134,7 @@ def init(matrix):
                 x = math.sqrt(2 / 8)
             matrix[i][j] = x * math.cos(math.pi * (j + 0.5) * i / 8)
 
-
-if __name__ == '__main__':
+def setA():
     A = numpy.zeros([8, 8])
     Z = numpy.array(
         [[0, 1], [1, -1],
@@ -155,4 +157,7 @@ if __name__ == '__main__':
     A_T = A.transpose()
     A_i = numpy.linalg.inv(A)
     A_iT = numpy.linalg.inv(A_T)
-    main()
+
+if __name__ == '__main__':
+    setA()
+    main("images/image.bmp", "1.txt")
