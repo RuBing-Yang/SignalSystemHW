@@ -5,7 +5,7 @@
 
 [toc]
 
-将encode.py和decode.py封装到同一个类helper中
+将`encode.py`和`decode.py`封装到同一个类`helper`中
 
 调用方法：
 
@@ -23,6 +23,4 @@ helper.decode_to_img()
 
 ### 运行方式
 
-运行 encode.py，将 images/image.bmp 编码为 1.txt。
-
-运行 decode.py，将 1.txt 转换为 out.bmp
+直接运行`main.py`
