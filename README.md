@@ -5,6 +5,12 @@
 
 [toc]
 
+## Cython
+
+[Python调用C++](https://zhuanlan.zhihu.com/p/74219095)
+
+## 更改内容
+
 将`encode.py`和`decode.py`封装到同一个类`helper`中
 
 调用方法：
@@ -21,6 +27,6 @@ helper.decode_to_img()
 
 
 
-### 运行方式
+## 运行方式
 
 直接运行`main.py`
