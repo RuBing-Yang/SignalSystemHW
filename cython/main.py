@@ -5,9 +5,9 @@ import rect
 from rect import PyHuffman
 
 if __name__ == '__main__':
-    #helper = helper("images/image.bmp", "encode.txt", "images/out.bmp")
-    #helper.encode_from_img()
-    #helper.decode_to_img()
+    helper = helper("images/image.bmp", "encode.txt", "images/out.bmp")
+    helper.encode_from_img()
+    helper.decode_to_img()
     '''dehuffman部分还没写'''
     # help (rect)
     help (PyHuffman)
