@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-from helper import helper
+# from helper import helper
 import rect
 from rect import PyHuffman
 
@@ -18,5 +18,5 @@ if __name__ == '__main__':
     print("0")
     huffman = PyHuffman(name1, name2, name3, name4)
     print("1")
-    huffman.compress()
+    huffman.huff()
     print("2")
