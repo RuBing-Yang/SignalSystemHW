@@ -23,7 +23,7 @@ namespace compress {
         float freq = 0.0f;
         struct pixfreq* left = nullptr;
         struct pixfreq* right = nullptr;
-        std::string code = "0";
+        std::string code = "";
     }PIXFREQ;
 
     typedef struct huffcode
@@ -31,7 +31,7 @@ namespace compress {
         int pix = 0;
         int arrloc = 0;
         float freq = 0.0f;
-        std::string code = "0";
+        std::string code = "";
     }HUFFCODE;
 
     class Huffman {
@@ -44,10 +44,10 @@ namespace compress {
 
     public:
         std::map<int, int> hist;
-        std::ifstream img_code;
-        std::FILE* img_huff;
-        std::ifstream compress_file;
-        std::ofstream decompress_file;
+        char* img_code_name;
+        char* img_huff_name;
+        char* compress_file_name;
+        char* decompress_file_name;
         std::vector<struct pixfreq*> pixfreqs;
         std::vector<struct huffcode*> huffcodes;
         std::vector<int> compress_numbers;
@@ -55,7 +55,7 @@ namespace compress {
 
         Huffman();
         Huffman(char* img_code_name, char* img_huff_name,
-                char* compress_file_name, char* decompress_file_name);
+            char* compress_file_name, char* decompress_file_name);
         ~Huffman();
         void huff();
         void dehuff();

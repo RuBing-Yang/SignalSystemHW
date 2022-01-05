@@ -5,15 +5,16 @@ from skimage import io
 
 class helper:
 
-    def __init__(self, in_img_name, file_name, out_img_name):
+    def __init__(self, in_img_name, encode_file_name, decode_file_name, out_img_name):
         self.setA()
         self.in_img_name = in_img_name
-        self.file_name = file_name
+        self.encode_file_name = encode_file_name
+        self.decode_file_name = decode_file_name
         self.out_img_name = out_img_name
 
-    def set_file_name(self, in_img_name, file_name):
+    def set_encode_file_name(self, in_img_name, encode_file_name):
         self.in_img_name = in_img_name
-        self.file_name = file_name
+        self.encode_file_name = encode_file_name
 
     def dbf(self, tag, img):
         print(
@@ -66,7 +67,7 @@ class helper:
         image = io.imread(self.in_img_name)
         data = np.array(image, dtype=float)
         print(data.shape)
-        file_handle = open(self.file_name, mode='w')
+        file_handle = open(self.encode_file_name, mode='w')
         file_handle.write(str(int(len(data) // 16 * 16)) + '\n')
         file_handle.write(str(int(len(data[0]) // 16 * 16)) + '\n')
 
@@ -211,7 +212,7 @@ class helper:
              [99, 99, 99, 99, 99, 99, 99, 99]]
         )
 
-        file_handle = open(self.file_name, mode='r')
+        file_handle = open(self.decode_file_name, mode='r')
         buffer = []
         for i in file_handle.readlines():
             buffer.append(int(i))
