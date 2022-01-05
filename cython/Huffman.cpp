@@ -24,11 +24,12 @@ namespace compress {
         std::ifstream img_code;
         img_code.open(img_code_name);
         std::cout << "Huffman::readRawData" << std::endl;
-        int number;
+        std::string number;
         std::cout << "read number" << std::endl;
         while (img_code >> number) {
             raw_numbers.push_back(number);
         }
+        raw_numbers.push_back("EOF");
         std::cout << "read number size " << raw_numbers.size() << std::endl;
         img_code.close();
     }
@@ -86,7 +87,7 @@ namespace compress {
         totalnodes = 2 * nodes - 1;
 
         float p = 1.0, ptemp;
-        std::map<int, int>::iterator it;
+        std::map<std::string, int>::iterator it;
         for (it = hist.begin(); it != hist.end(); it++)
         {
             ptemp = (it->second / (float)(raw_numbers.size()));
@@ -104,12 +105,15 @@ namespace compress {
         readRawData();
         occurrence();
 
-        std::FILE* img_huff;
-        fopen_s(&img_huff, (const char*)img_huff_name, "w");
+        //std::FILE* img_huff;
+        //fopen_s(&img_huff, (const char*)img_huff_name, "w");
+        std::ofstream img_huff;
+        img_huff.open(img_huff_name, std::ios::binary | std::ios::out);
+
 
         int totpix = (int)raw_numbers.size();
         float tempprob;
-        std::map<int, int>::iterator it;
+        std::map<std::string, int>::iterator it;
         for (it = hist.begin(); it != hist.end(); it++)
         {
             struct huffcode* new_huffcode = new HUFFCODE();
@@ -128,7 +132,7 @@ namespace compress {
 
         // Building Huffman Tree
         float sumprob;
-        int sumpix;
+        std::string sumpix;
         int n = 0, k = 0, i = 0;
         int nextnode = nodes;
         while (n < nodes - 1)
@@ -172,7 +176,7 @@ namespace compress {
 
         std::cout << "Huffmann code::" << std::endl;
         std::cout << "pixel values   ->   Code" << std::endl;
-        std::map<int, std::string> pix2code;
+        std::map<std::string, std::string> pix2code;
         for (int i = 0; i < nodes; i++) {
             //std::cout << pixfreqs[i]->pix << "->" << pixfreqs[i]->code << std::endl;
             pix2code[pixfreqs[i]->pix] = pixfreqs[i]->code;
@@ -186,25 +190,26 @@ namespace compress {
         ss >> s;
         while (s.length() > 0) {
             std::stringstream ss_temp;
-            ss_temp << s.substr(0, 8);
-            int n_2;
-            int mult = 1;
-            int n_16 = 0;
+            std::string s_temp = s.substr(0, 8);
+            while (s_temp.length() < 8) s_temp += '0';
+            ss_temp << s_temp;
+            unsigned int n_2;
+            unsigned int mult = 1;
+            uint8_t n_10 = 0;
             ss_temp >> n_2;
-            ss_temp.clear();
             while (n_2 > 0) {
-                n_16 += (n_2 % 10) * mult;
+                n_10 += (n_2 % 10) * mult;
                 n_2 = (int)n_2 / 10;
                 mult *= 2;
             }
-            if (s.length() >= 8) {
+            //int ttt = n_10;
+            //std::cout << s_temp << std::endl;
+            //std::cout << ttt << std::endl;
+            img_huff.write((char*)&n_10, sizeof(n_10));
+            if (s.length() > 8)
                 s = s.substr(8);
-                fprintf(img_huff, "%02x", n_16);
-            }
-            else {
-                fprintf(img_huff, "*%s", s);
+            else
                 s = "";
-            }
         }
 
 
@@ -213,56 +218,56 @@ namespace compress {
         for (i = 0; i < nodes; i++)
             avgbitnum += pixfreqs[i]->freq * codelen((char*)pixfreqs[i]->code.data());
         printf("Average number of bits:: %f\n", avgbitnum);
-        fclose(img_huff);
+        img_huff.close();
     }
 
     void Huffman::dehuff()
     {
-        std::ifstream compress_file;
+        //std::ifstream compress_file;
         std::ofstream decompress_file;
-        compress_file.open(compress_file_name);
+        //compress_file.open(compress_file_name);
         decompress_file.open(decompress_file_name);
 
-        std::string s_16 = "", s_2 = "";
-        compress_file >> s_16;
-        for (int i = 0; i < s_16.size(); i++) {
-            if (s_16[i] == '*') {
-                while (++i < s_16.size()) s_2 += s_16[i];
-                break;
-            }
-            std::stringstream ss;
-            int t_16 = 0, t_2 = 0;
-            ss << s_16[i];
-            ss >> std::hex >> t_16;
-            int mult = 1;
-            while (t_16 != 0) {
-                t_2 += (t_16 % 2) * mult;
-                t_16 /= 2;
+        std::ifstream compress_file;
+        compress_file.open(compress_file_name, std::ios::binary | std::ios::in);
+
+        std::string s_2 = "";
+        uint8_t t_10;
+        while (compress_file.read((char*)&t_10, sizeof(char))) {
+            unsigned int t_2 = 0;
+            unsigned int mult = 1;
+            while (t_10 != 0) {
+                t_2 += (t_10 % 2) * mult;
+                t_10 /= 2;
                 mult *= 10;
             }
             char c[10];
-            sprintf_s(c, "%04d", t_2);
+            sprintf_s(c, "%08d", t_2);
+            //std::cout << c << std::endl;
             s_2 += c;
         }
+
         int i = 0;
         std::cout << "Huffman Decode" << std::endl;
         PIXFREQ* p = pixfreqs[totalnodes - 1];
         while (i < s_2.size()) {
             if (s_2[i] == '0' && p->left != nullptr) {
                 p = p->left;
+                i++;
                 if (p->left == nullptr && p->right == nullptr) {
+                    if (p->pix == "EOF") break;
                     decompress_file << p->pix << std::endl;
                     p = pixfreqs[totalnodes - 1];
                 }
-                i++;
             }
             else if (s_2[i] == '1' && p->right != nullptr) {
-                p = p->right; 
+                p = p->right;
+                i++;
                 if (p->left == nullptr && p->right == nullptr) {
+                    if (p->pix == "EOF") break;
                     decompress_file << p->pix << std::endl;
                     p = pixfreqs[totalnodes - 1];
                 }
-                i++;
             }
             else {
                 std::cout << "decode error" << std::endl;
@@ -281,8 +286,8 @@ int main()
 {
     using namespace compress;
     char s1[] = "encode.txt\0";
-    char s2[] = "huffman.txt\0";
-    char s3[] = "huffman.txt\0";
+    char s2[] = "huffman.bin\0";
+    char s3[] = "huffman.bin\0";
     char s4[] = "dehuffman.txt\0";
 
     /*std::ifstream infile;

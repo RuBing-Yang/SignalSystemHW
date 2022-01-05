@@ -17,7 +17,7 @@ namespace compress {
 
     typedef struct pixfreq
     {
-        int pix = 0;
+        std::string pix = "";
         int larrloc = 0;
         int rarrloc = 0;
         float freq = 0.0f;
@@ -28,7 +28,7 @@ namespace compress {
 
     typedef struct huffcode
     {
-        int pix = 0;
+        std::string pix = "";
         int arrloc = 0;
         float freq = 0.0f;
         std::string code = "";
@@ -38,12 +38,12 @@ namespace compress {
     private:
         int nodes = 0;
         int totalnodes = 0;
-        std::vector<int> raw_numbers;
+        std::vector<std::string> raw_numbers;
         void readRawData();
         void occurrence();
 
     public:
-        std::map<int, int> hist;
+        std::map<std::string, int> hist;
         char* img_code_name;
         char* img_huff_name;
         char* compress_file_name;
