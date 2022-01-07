@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+import sys
 import time
 from helper import helper
 import rect
@@ -8,12 +9,15 @@ from rect import PyHuffman
 if __name__ == '__main__':
     time0 = time.time()
 
-    helper = helper("images/image.bmp", "encode.txt", "dehuffman.txt", "images/out.bmp")
+    addr = "images/image.bmp"
+    if len(sys.argv) == 2:
+        addr = sys.argv[1]
+    helper = helper(addr, "encode.txt", "dehuffman.txt", "images/out.bmp")
     helper.encode_from_img()
 
     ''' cython start '''
     # help (rect)
-    help (PyHuffman)
+    #help (PyHuffman)
     name1 = bytes("encode.txt", encoding='utf8')
     name2 = bytes("huffman.bin", encoding='utf8')
     name3 = bytes("huffman.bin", encoding='utf8')
