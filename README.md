@@ -5,46 +5,54 @@
 
 [toc]
 
-## 资源
+## Cython
 
-### OpenCV
-
-[颜色空间变换](https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html)
-
-[傅里叶变换](https://docs.opencv.org/4.x/de/dbc/tutorial_py_fourier_transform.html)
-
-### 测试库
-
-这个回答里面提到了三个开源测试库：
-
-https://www.quora.com/What-is-the-best-image-compression-algorithm-and-what-is-the-Facebook-compression-algorithm
-
-### Github
-
-可能有用：[digital_video_introduction](https://github.com/leandromoreira/digital_video_introduction)
+[Python调用C++](https://zhuanlan.zhihu.com/p/74219095)
 
 
 
-## 基础知识
+## 更改内容
 
-### 频域变换
+### 封装Python
 
-#### 彩色图像处理
+将`encode.py`和`decode.py`封装到同一个类`helper`中
 
-参考博客：[Images in Frequency Domain](https://sbme-tutorials.github.io/2018/cv/notes/3_week3.html#color-image-processing-block-diagram)
+调用方法：
 
-<img src="https://sbme-tutorials.github.io/2018/cv/images/block_diagram.png" alt="img" style="zoom:80%;" />
+```python
+from helper import helper
+# 创建类实例，初始化输入、输出图片和编码文件名
+helper = helper("images/image.bmp", "encode.txt", "images/out.bmp")
+# encode
+helper.encode_from_img()
+# decode
+helper.decode_to_img()
+```
 
-#### 傅里叶变换
+### 封装C++
 
-应该是用OpenCV叭
+在`/SignalSystemHW/cython/Huffman.cpp`文件中是用C++写的哈夫曼编码API
 
-### 图像压缩
+**TODO**：de huffman
 
-图像压缩技术综述的一篇调研论文：[Image compression algorithms in wireless multimedia sensor networks: A survey](https://www.sciencedirect.com/science/article/pii/S2090447914001567)
+利用Cython封装成`rect.PyHuffman`类，在cython文件夹下命令行运行：
 
-### 运行方式
+```
+python setup.py build_ext --inplace
+```
 
-运行 encode.py，将 images/image.bmp 编码为 1.txt。
+生成的动态链接库文件名为`rect.cp39-win_amd64.pyd`，需要与调用方python入口文件放在同一文件夹下
 
-运行 decode.py，将 1.txt 转换为 out.bmp
+
+
+## 运行方式
+
+直接运行`/SignalSystemHW/main.py`
+
+输入文件：`/SignalSystemHW/images/image.bmp`
+
+python的编码文件：`/SignalSystemHW/encode.txt`
+
+c++的哈夫曼编码文件：`/SignalSystemHW/huffman.txt`
+
+ps：建议在visual studio运行（但是vs需要装python拓展，得挂梯子）

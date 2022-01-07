@@ -1,2 +1,13 @@
 .idea/
-images/out.bmp
+__pycache__/
+build/
+.vs/
+*/.idea/
+*/__pycache__/
+*/build/
+*/.vs/
+*/*.o
+dehuffman.txt
+encode.txt
+huffman.bin
+rect.cpython-310-x86_64-linux-gnu.so
