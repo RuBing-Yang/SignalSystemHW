@@ -9,9 +9,7 @@ from rect import PyHuffman
 if __name__ == '__main__':
     time0 = time.time()
 
-    addr = "images/image.bmp"
-    if len(sys.argv) == 2:
-        addr = sys.argv[1]
+    addr = "images/demo.bmp"
     helper = helper(addr, "encode.txt", "dehuffman.txt", "images/out.bmp")
     helper.encode_from_img()
 
