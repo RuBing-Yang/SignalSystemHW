@@ -33,8 +33,6 @@ helper.decode_to_img()
 
 在`/SignalSystemHW/cython/Huffman.cpp`文件中是用C++写的哈夫曼编码API
 
-**TODO**：de huffman
-
 利用Cython封装成`rect.PyHuffman`类，在cython文件夹下命令行运行：
 
 ```
@@ -49,10 +47,22 @@ python setup.py build_ext --inplace
 
 直接运行`/SignalSystemHW/main.py`
 
+动态链接库：`/SignalSystemHW/cython/rect.cp39-win_amd64.pyd`
+
 输入文件：`/SignalSystemHW/images/image.bmp`
 
-python的编码文件：`/SignalSystemHW/encode.txt`
+python的编码压缩后文件：`/SignalSystemHW/encode.txt`
 
-c++的哈夫曼编码文件：`/SignalSystemHW/huffman.txt`
+c++的哈夫曼编码压缩后文件：`/SignalSystemHW/huffman.bin`
 
-ps：建议在visual studio运行（但是vs需要装python拓展，得挂梯子）
+哈夫曼节点保存：`/SignalSystemHW/num2freq.bin`
+
+哈夫曼树保存：`/SignalSystemHW/tree.bin`
+
+c++的哈夫曼解码文件：`/SignalSystemHW/dehuffman.txt`
+
+输出图片：`/SignalSystemHW/images/out.bmp`
+
+==**一句话运行：**==
+
+在pycharm打开PyHuffman文件夹，确保`rect.cp39-win_amd64.pyd`文件在文件夹中，运行`main.py`文件
