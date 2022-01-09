@@ -8,6 +8,7 @@
 #include <string>
 #include <bitset>
 #include <vector>
+#include <queue>
 #include <map>
 
 #ifndef HUFFMAN_H
@@ -15,56 +16,63 @@
 
 namespace compress {
 
-    typedef struct pixfreq
+    typedef struct tree_node
     {
-        std::string pix = "";
-        int larrloc = 0;
-        int rarrloc = 0;
-        float freq = 0.0f;
-        struct pixfreq* left = nullptr;
-        struct pixfreq* right = nullptr;
+        std::string number = "";
         std::string code = "";
-    }PIXFREQ;
+        unsigned int freq = 0;
+        struct tree_node* left = nullptr;
+        struct tree_node* right = nullptr;
+        tree_node() {
+            number = "";
+            code = "";
+            freq = 0;
+            left = nullptr;
+            right = nullptr;
+        }
+    }TREE_NODE;
 
-    typedef struct huffcode
-    {
-        std::string pix = "";
-        int arrloc = 0;
-        float freq = 0.0f;
-        std::string code = "";
-    }HUFFCODE;
+    struct compareByFreq {
+        bool operator()(const TREE_NODE* a, const TREE_NODE* b) { return (a->freq > b->freq); }
+    };
 
     class Huffman {
     private:
         int nodes = 0;
         int totalnodes = 0;
-        std::vector<std::string> raw_numbers;
-        void readRawData();
-        void occurrence();
-
-    public:
-        std::map<std::string, int> hist;
         char* img_code_name;
         char* img_huff_name;
         char* compress_file_name;
         char* decompress_file_name;
-        std::vector<struct pixfreq*> pixfreqs;
-        std::vector<struct huffcode*> huffcodes;
-        std::vector<int> compress_numbers;
-        std::vector<int> decompress_number;
+
+        void readRawData();
+        void occurrence();
+        void createTree();
+        std::string readBinaryData();
+        void preOrder(TREE_NODE* node);
+        void decodeWithTree(std::string s_2);
+        void saveNode(TREE_NODE* node, std::ofstream* tree_file);
+        void readNode(TREE_NODE* node, std::ifstream* tree_file);
+
+    public:
+        std::vector<std::string> raw_numbers;
+        std::map<std::string, int> num2freq;
+        std::map<std::string, std::string> num2code;
+        std::priority_queue<TREE_NODE*, std::vector<TREE_NODE*>, compareByFreq> minHeap;
 
         Huffman();
         Huffman(char* img_code_name, char* img_huff_name,
             char* compress_file_name, char* decompress_file_name);
         ~Huffman();
-        void huff();
-        void dehuff();
+        void saveTree(char* num2freq_file_name, char* tree_file_name);
+        void encode1();
+        void encode2(char* img_code_name, char* img_huff_name);
+        void decode1();
+        void decode2(char* compress_file_name, char* decompress_file_name);
+        void decode3(int type, char* tree_file_name);
+        void decode4(int type, char* tree_file_name, char* compress_file_name, char* decompress_file_name);
     };
 
-
-    int fib(int n);
-    int codelen(char* code);
-    void strconcat(char* str, char* parentcode, char add);
 }
 
 #endif
