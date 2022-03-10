@@ -18,18 +18,27 @@ jobs:
 
 
   HashMap-Encode-Job:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: python3 --version
-      - run: sudo apt-get update -qy
-      - run: sudo apt-get install -y python3-pip
-      - run: pip3 --version
-      - run: pip3 install scikit-image
-      - run: pip3 install numpy
-      - run: pip3 install sympy
-      - run: pip3 list
-      - run: pip3 install Cython --install-option="--no-cython-compile"
-      - run: python3 "${{ github.workspace }}/main.py"
+      # - run: python3 --version
+      # - run: sudo apt-get update -qy
+      # - run: sudo apt-get install -y python3-pip
+      # - run: pip3 --version
+      # - run: pip3 install scikit-image
+      # - run: pip3 install numpy
+      # - run: pip3 install sympy
+      # - run: pip3 list
+      # - run: pip3 install Cython --install-option="--no-cython-compile"
+      # - run: python3 "${{ github.workspace }}/main.py"
+      - run: python --version
+      - run: pip --version
+      - run: pip install scikit-image
+      - run: pip install numpy
+      - run: pip install sympy
+      - run: pip list
+      - run: pip install Cython --install-option="--no-cython-compile"
+      - run: python "${{ github.workspace }}/main.py"
+
 
