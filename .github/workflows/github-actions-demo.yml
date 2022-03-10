@@ -29,5 +29,5 @@ jobs:
       - run: pip3 install sympy
       - run: pip3 list
       - run: pip3 install Cython --install-option="--no-cython-compile"
-      - run: python3 main.py
+      - run: python3 "${{ github.repository }}/main.py"
 
