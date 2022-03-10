@@ -15,5 +15,14 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: python3 --version
+      - run: apt-get update -qy
+      - run: apt-get install -y python3-pip
+      - run: pip3 --version
+      - run: pip3 install scikit-image
+      - run: pip3 install numpy
+      - run: pip3 install sympy
+      - run: pip3 list
+      - pip3 install Cython --install-option="--no-cython-compile"
+      - run: python3 main.py
 
-      
